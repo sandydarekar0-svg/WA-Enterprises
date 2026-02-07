@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">WhatsApp Bulk Sender</a>
+            <span class="navbar-text text-white me-3">Credits: <strong id="credits">0</strong></span>
+            <a href="/logout" class="btn btn-danger btn-sm">Logout</a>
+        </div>
+    </nav>
+
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Credits Balance</h5>
+                    <h2 id="creditBalance">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Messages Sent</h5>
+                    <h2 id="messagesSent">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Campaigns</h5>
+                    <h2 id="campaignsCount">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <a href="#" class="btn btn-primary mt-4">Buy Credits</a>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Send WhatsApp Message</h5>
+                </div>
+                <div class="card-body">
+                    <form id="sendForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Phone Number</label>
+                                <input type="text" name="phone" class="form-control" placeholder="+1234567890" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Message</label>
+                                <textarea name="message" class="form-control" required></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load user profile
+fetch('/api/auth.php?action=profile')
+    .then(r => r.json())
+    .then(d => {
+        document.getElementById('creditBalance').textContent = d.data.credits;
+        document.getElementById('credits').textContent = d.data.credits;
+    });
+
+// Load messages count
+fetch('/api/messages.php?action=list')
+    .then(r => r.json())
+    .then(d => {
+        document.getElementById('messagesSent').textContent = d.data.length;
+    });
+
+// Load campaigns count
+fetch('/api/campaigns.php?action=list')
+    .then(r => r.json())
+    .then(d => {
+        document.getElementById('campaignsCount').textContent = d.data.length;
+    });
+
+// Send message
+document.getElementById('sendForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const form = new FormData(this);
+    form.append('action', 'send');
+    
+    fetch('/api/messages.php', {
+        method: 'POST',
+        body: form
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            alert('✅ Message sent!');
+            this.reset();
+            location.reload();
+        } else {
+            alert('❌ ' + d.message);
+        }
+    });
+});
+</script>
+</body>
+  </html>
